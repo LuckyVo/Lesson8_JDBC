@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="okio-2.7.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../Библиотеки для JAVA/okio-2.7.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Библиотеки для JAVA/okhttp-4.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Библиотеки для JAVA/kotlin-stdlib-1.3.72.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Библиотеки для JAVA/jackson-databind-2.11.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Библиотеки для JAVA/jackson-annotations-2.11.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../Библиотеки для JAVA/jackson-core-2.11.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
