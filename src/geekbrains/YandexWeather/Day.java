@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Day {
     @JsonProperty("temp_avg")
-    private Integer tempAvg;
+    private Long tempAvg;
     private WindDir windDir;
     @JsonProperty("condition")
     private Condition condition;
 
-    public Integer getTempAvg() { return tempAvg; }
-    public void setTempAvg(Integer value) { this.tempAvg = value; }
+    public Long getTempAvg() { return tempAvg; }
+    public void setTempAvg(Long value) { this.tempAvg = value; }
 
     public WindDir getWindDir() { return windDir; }
     public void setWindDir(WindDir value) { this.windDir = value; }

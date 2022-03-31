@@ -9,7 +9,6 @@ import java.util.*;
 public class UserInterface {
 
     private Controller controller = new Controller();
-    private ControllerForecastForDate controllerForecastForDate = new ControllerForecastForDate();
     private ApplicationGlobalCity applicationGlobalCity = new ApplicationGlobalCity();
 
     public void runApplication(){
@@ -38,11 +37,7 @@ public class UserInterface {
                 continue;
             }
 
-            System.out.println("Если желаете завершить работу программы, то введите: выход/exit:");
-            String exit = scanner.nextLine();
-            checkIsExit(exit);
-
-            System.out.println("Выберите дату для вывода прогноза погоды в пределах запроса(формат YYYY-MM-DD):");
+            System.out.println("Выберите дату для вывода прогноза погоды в пределах выполненного запроса(формат YYYY-MM-DD):");
             String forecastForDate = scanner.nextLine();
             setDate(forecastForDate);
 
@@ -53,18 +48,31 @@ public class UserInterface {
                 continue;
             }
             try {
-                notifyControllerForecastForDate(forecastForDate);
+                notifyControllerForecastForDate();
             } catch (IOException e) {
                 e.printStackTrace();
                 continue;
             }
 
+            System.out.println("Выберите all для вывода всей информации из базы данных");
+            String allFromDB = scanner.nextLine();
+            setDate(allFromDB);
+            try {
+                notifyControllerForecastAllFromDB();
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            System.out.println("Если желаете завершить работу программы, то введите: выход/exit/0:");
+            String exit = scanner.nextLine();
+            checkIsExit(exit);
 
         }
     }
 
     private void checkIsExit(String exit) {
-        if (exit.toLowerCase().equals("выход") || exit.toLowerCase().equals("exit")) {
+        if (exit.toLowerCase().equals("выход") || exit.toLowerCase().equals("exit") || exit.equals("0")) {
             System.out.println("Завершаю работу");
             System.exit(0);
         }
@@ -92,11 +100,15 @@ public class UserInterface {
     }
 
     private void notifyController(String limit) throws IOException{
-        controller.onUserInput(limit);
+        controller.onUserInputLimit(limit);
     }
 
-    private void notifyControllerForecastForDate(String forecastForDate) throws IOException{
-        controllerForecastForDate.onUserInput(forecastForDate);
+    private void notifyControllerForecastForDate() throws IOException{
+        controller.onUserInputDate();
+    }
+
+    private void notifyControllerForecastAllFromDB() throws IOException{
+        controller.userWantAllFromDB();
     }
 
     public void setDate(String forecastForDate) { ForecastForDate.getInstance().setEnteredDate(forecastForDate); }

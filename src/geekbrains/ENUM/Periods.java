@@ -1,5 +1,8 @@
 package geekbrains.ENUM;
 
 public enum Periods {
-    CUSTOM
+    CUSTOM,
+    DB_DATE,
+    DB_ALL,
+
 }

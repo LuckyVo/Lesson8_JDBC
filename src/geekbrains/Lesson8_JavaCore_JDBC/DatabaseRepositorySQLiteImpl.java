@@ -2,6 +2,7 @@ package geekbrains.Lesson8_JavaCore_JDBC;
 
 import geekbrains.DBClass.WeatherData;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
@@ -12,18 +13,25 @@ import java.util.Properties;
 public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
 
     static Properties prop = new Properties();
-
-    @Override
-    public void createWeatherData() throws SQLException, IOException  {
+    static {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-        dropTable();
-        createTableIfNotExists();
     }
+    String selectTable = "SELECT * FROM " + prop.getProperty("WEATHER_TABLE") + ";";
+
+    String insertTable = "INSERT INTO " + prop.getProperty("WEATHER_TABLE") +
+            " (city, date_time, weather_text, temperature) VALUES (?,?,?,?);";
+
+    String createTable = "CREATE TABLE IF NOT EXISTS " + prop.getProperty("WEATHER_TABLE")  +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "city TEXT NOT NULL," +
+            "date_time TEXT NOT NULL," +
+            "weather_text TEXT NOT NULL," +
+            "temperature REAL NOT NULL" +
+            ");";
 
     private Connection getConnection() throws SQLException, IOException {
         loadProperties();
@@ -37,16 +45,20 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
         connection.createStatement().executeUpdate("DROP TABLE IF EXISTS " + prop.getProperty("WEATHER_TABLE"));
     }
 
-    private void createTableIfNotExists() throws IOException {
+    private void closeConnection (){
+        try {
+            getConnection().close();
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void createTableIfNotExists() throws IOException, SQLException {
         loadProperties();
+        dropTable();
         try (Connection connection = getConnection()) {
-            connection.createStatement().execute("CREATE TABLE IF NOT EXISTS " + prop.getProperty("WEATHER_TABLE") +
-                    " (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "city TEXT NOT NULL, " +
-                    "date_time TEXT NOT NULL, " +
-                    "weather_text TEXT NOT NULL, " +
-                    "temperature INTEGER NOT NULL " +
-                    ");");
+            connection.createStatement().execute(createTable);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
@@ -54,18 +66,15 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
 
 
     @Override
-    public void saveWeatherData(ArrayList<WeatherData> weatherData) throws SQLException, IOException {
+    public boolean saveWeatherData(WeatherData weatherData) throws SQLException, IOException {
         loadProperties();
         try (Connection connection = getConnection();
-             PreparedStatement saveWeather = connection.prepareStatement
-                     ("INSERT INTO " + prop.getProperty("WEATHER_TABLE") +
-                         " (city, date_time, weather_text, temperature) VALUES (?,?,?,?);")) {
-            saveWeather.setString(1, String.valueOf(weatherData.get(1)));
-            saveWeather.setString(2, String.valueOf(weatherData.get(2)));
-            saveWeather.setString(3, String.valueOf(weatherData.get(3)));
-            saveWeather.setInt(4, Integer.parseInt(String.valueOf(weatherData.get(4))));
-            saveWeather.addBatch();
-
+             PreparedStatement saveWeather = connection.prepareStatement(insertTable)) {
+            saveWeather.setString(1, weatherData.getCity());
+            saveWeather.setString(2, weatherData.getLocalDate());
+            saveWeather.setString(3, weatherData.getText());
+            saveWeather.setLong(4, weatherData.getTemperature());
+            return saveWeather.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -74,21 +83,31 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
 
 
     @Override
-    public void getForecastForDate(String forecastForDate) throws IOException {
+    public List<WeatherData> getForecastForDate(String forecastForDate) throws IOException, SQLException {
         loadProperties();
         try (Connection connection = getConnection();
-             ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM " + prop.getProperty("WEATHER_TABLE"))) {
+             ResultSet resultSet = connection.createStatement().executeQuery(selectTable)) {
+            List<WeatherData> weatherDataList = new ArrayList<>();
             while (resultSet.next()) {
-                System.out.println(
-                        resultSet.getString(1) + " | " +
-                                resultSet.getString(2) + " | " +
-                                resultSet.getString(3) + " | " +
-                                resultSet.getDouble(4) + " | "
-                );
+                weatherDataList.add(new WeatherData(resultSet.getString(2),
+                        resultSet.getString(3), resultSet.getString(4),
+                        resultSet.getLong(5)));
+
             }
-        }catch (SQLException e) {
-            e.printStackTrace();
+            return weatherDataList;
         }
+
+    }
+
+    public List<WeatherData> getAllWeatherFromDB() throws IOException, SQLException {
+        ResultSet resultSet = getConnection().createStatement().executeQuery(selectTable);
+        List<WeatherData> weatherDataList = new ArrayList<>();
+        while (resultSet.next()) {
+            weatherDataList.add(new WeatherData(resultSet.getString(2),
+                    resultSet.getString(3), resultSet.getString(4),
+                    resultSet.getLong(5)));
+        }
+        return weatherDataList;
     }
 
 
@@ -97,4 +116,10 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
             prop.load(configFile);
         }
     }
+
+
+
+
+
+
 }

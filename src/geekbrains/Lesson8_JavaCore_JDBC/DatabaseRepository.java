@@ -5,18 +5,16 @@ import geekbrains.DBClass.WeatherData;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
-// Репозиторий для работы
 public interface DatabaseRepository {
 
 
-    void createWeatherData() throws SQLException, IOException;
+    void createTableIfNotExists() throws SQLException, IOException;
 
-    void saveWeatherData(ArrayList<WeatherData> weatherData) throws SQLException, IOException;
+    boolean saveWeatherData(WeatherData weatherData) throws SQLException, IOException;
 
-    void getForecastForDate(String forecastForDate) throws IOException;
+    List<WeatherData> getForecastForDate(String date) throws IOException, SQLException;
 
-
+    List<WeatherData> getAllWeatherFromDB() throws IOException, SQLException;
 }

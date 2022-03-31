@@ -4,6 +4,7 @@ import geekbrains.ENUM.Functionality;
 import geekbrains.ENUM.Periods;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class Controller {
         variantResult.put(7, Functionality.GET_WEATHER_IN_NEXT_7_DAYS);
     }
 
-    public void onUserInput(String limit) throws IOException {
+    public void onUserInputLimit(String limit) throws IOException {
         int command = Integer.parseInt(limit);
         if (!variantResult.containsKey(command)) {
             throw new IOException("На прогноз вне 7 дней, стоит обратиться к бабке гадалке.");
@@ -40,6 +41,15 @@ public class Controller {
         }
     }
 
+    public void onUserInputDate(){
+        getForecastForDate();
+    }
+
+    public void userWantAllFromDB(){
+        getForecastAllFromDB();
+    }
+
+
     public void getCustomWeather(){
         try {
             weatherProvider.getWeather(Periods.CUSTOM);
@@ -49,6 +59,22 @@ public class Controller {
 
     }
 
+    public void getForecastForDate(){
+        try {
+            weatherProvider.getWeather(Periods.DB_DATE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+    }
+
+    public void getForecastAllFromDB(){
+        try {
+            weatherProvider.getWeather(Periods.DB_ALL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
