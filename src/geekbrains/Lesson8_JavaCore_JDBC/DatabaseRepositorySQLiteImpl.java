@@ -20,12 +20,11 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
             e.printStackTrace();
         }
     }
-    String selectTable = "SELECT * FROM " + prop.getProperty("WEATHER_TABLE") + ";";
+    String selectTable = "SELECT * FROM weather;";
 
-    String insertTable = "INSERT INTO " + prop.getProperty("WEATHER_TABLE") +
-            " (city, date_time, weather_text, temperature) VALUES (?,?,?,?);";
+    String insertTable = "INSERT INTO weather (city, date_time, weather_text, temperature) VALUES (?,?,?,?);";
 
-    String createTable = "CREATE TABLE IF NOT EXISTS " + prop.getProperty("WEATHER_TABLE")  +
+    String createTable = "CREATE TABLE IF NOT EXISTS weather"  +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "city TEXT NOT NULL," +
             "date_time TEXT NOT NULL," +
@@ -42,7 +41,7 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
     private void dropTable() throws SQLException, IOException {
         loadProperties();
         Connection connection = getConnection();
-        connection.createStatement().executeUpdate("DROP TABLE IF EXISTS " + prop.getProperty("WEATHER_TABLE"));
+        connection.createStatement().executeUpdate("DROP TABLE IF EXISTS weather");
     }
 
     private void closeConnection (){
