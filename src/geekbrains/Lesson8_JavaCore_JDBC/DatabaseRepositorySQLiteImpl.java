@@ -20,16 +20,15 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
             e.printStackTrace();
         }
     }
-    String selectTable = "SELECT * FROM weather;";
-
+    String selectDateFromTable = "SELECT * FROM weather WHERE date_time = ?;";
+    String selectAllTable = "SELECT * FROM weather;";
     String insertTable = "INSERT INTO weather (city, date_time, weather_text, temperature) VALUES (?,?,?,?);";
-
-    String createTable = "CREATE TABLE IF NOT EXISTS weather"  +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "city TEXT NOT NULL," +
-            "date_time TEXT NOT NULL," +
-            "weather_text TEXT NOT NULL," +
-            "temperature REAL NOT NULL" +
+    String createTable = "CREATE TABLE IF NOT EXISTS weather (\n" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+            "city TEXT NOT NULL,\n" +
+            "date_time TEXT NOT NULL,\n" +
+            "weather_text TEXT NOT NULL,\n" +
+            "temperature REAL NOT NULL\n" +
             ");";
 
     private Connection getConnection() throws SQLException, IOException {
@@ -41,7 +40,7 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
     private void dropTable() throws SQLException, IOException {
         loadProperties();
         Connection connection = getConnection();
-        connection.createStatement().executeUpdate("DROP TABLE IF EXISTS weather");
+        connection.createStatement().executeUpdate("DROP TABLE IF EXISTS weather;");
     }
 
     private void closeConnection (){
@@ -54,7 +53,6 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
 
     @Override
     public void createTableIfNotExists() throws IOException, SQLException {
-        loadProperties();
         dropTable();
         try (Connection connection = getConnection()) {
             connection.createStatement().execute(createTable);
@@ -66,7 +64,6 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
 
     @Override
     public boolean saveWeatherData(WeatherData weatherData) throws SQLException, IOException {
-        loadProperties();
         try (Connection connection = getConnection();
              PreparedStatement saveWeather = connection.prepareStatement(insertTable)) {
             saveWeather.setString(1, weatherData.getCity());
@@ -83,23 +80,22 @@ public class DatabaseRepositorySQLiteImpl implements DatabaseRepository {
 
     @Override
     public List<WeatherData> getForecastForDate(String forecastForDate) throws IOException, SQLException {
-        loadProperties();
-        try (Connection connection = getConnection();
-             ResultSet resultSet = connection.createStatement().executeQuery(selectTable)) {
-            List<WeatherData> weatherDataList = new ArrayList<>();
-            while (resultSet.next()) {
-                weatherDataList.add(new WeatherData(resultSet.getString(2),
-                        resultSet.getString(3), resultSet.getString(4),
-                        resultSet.getLong(5)));
-
-            }
-            return weatherDataList;
+        PreparedStatement saveWeather = getConnection().prepareStatement(selectDateFromTable);
+        saveWeather.setString(1, forecastForDate);
+        ResultSet resultSet = saveWeather.executeQuery();
+        List<WeatherData> weatherDataList = new ArrayList<>();
+        while (resultSet.next()) {
+            weatherDataList.add(new WeatherData(resultSet.getString(2),
+                    resultSet.getString(3), resultSet.getString(4),
+                    resultSet.getLong(5)));
         }
+        return weatherDataList;
+
 
     }
 
     public List<WeatherData> getAllWeatherFromDB() throws IOException, SQLException {
-        ResultSet resultSet = getConnection().createStatement().executeQuery(selectTable);
+        ResultSet resultSet = getConnection().createStatement().executeQuery(selectAllTable);
         List<WeatherData> weatherDataList = new ArrayList<>();
         while (resultSet.next()) {
             weatherDataList.add(new WeatherData(resultSet.getString(2),
